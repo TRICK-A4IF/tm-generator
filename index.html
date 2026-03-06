@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TM-1 Pro Ultra - TRICK A4IF CYBER COMMUNITY</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&family=Shadows+Into_Light&family=Hind+Siliguri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #0f172a; --accent: #2563eb; --warn: #e74c3c; --success: #059669; --bg-card: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', 'Hind Siliguri', sans-serif; }
+        body { background: var(--primary); margin: 0; padding: 0; overflow-x: hidden; color: #333; width: 100%; }
+
+        /* Login & Splash */
+        #login-screen { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100000; padding: 20px; }
+        .login-box { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .pass-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-size: 16px; outline: none; }
+        .btn-login { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; }
+
+        #splash-screen { position: fixed; inset: 0; background: var(--primary); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; }
+        .splash-logo { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); padding: 5px; animation: pulse 2s infinite; object-fit: cover; }
+        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: white; z-index: 10001; justify-content: center; align-items: center; font-weight: bold; flex-direction: column; gap: 5px; }
+
+        /* UI Styling */
+        #main-app { display: none; padding: 10px; opacity: 0; transition: opacity 1s ease; max-width: 600px; margin: 0 auto; }
+        .dev-header { background: #fff; width: 100%; padding: 12px; border-radius: 15px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-left: 6px solid var(--accent); }
+        .dev-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--accent); margin-right: 12px; object-fit: cover; }
+        .dev-info h3 { margin: 0; color: var(--warn); font-size: 13px; text-transform: uppercase; line-height: 1.2; }
+        .dev-info p { margin: 2px 0; font-size: 10px; color: #475569; font-weight: 500; }
+        .dev-wa { margin-left: auto; text-align: right; font-size: 9px; font-weight: bold; color: var(--accent); }
+
+        .dashboard { background: var(--bg-card); padding: 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 10px; }
+        .row-group { display: flex; gap: 8px; width: 100%; }
+        .input-box { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .input-box label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; }
+        input, textarea { padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; width: 100%; outline: none; background: #f8fafc; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-exp { padding: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .btn-exp:active { transform: scale(0.95); }
+
+        /* Certificate Preview */
+        #cert-wrap { background: #1e293b; padding: 30px 5px; width: 100%; display: flex; justify-content: center; overflow: hidden; margin-top: 15px; border-radius: 15px; }
+        #certificate { background: white; width: 550px; height: 770px; padding: 40px 45px; position: relative; flex-shrink: 0; font-family: 'Times New Roman', serif; color: black; transform-origin: top center; }
+        
+        .logo { width: 55px; height: 55px; object-fit: contain; z-index: 1; }
+        /* লোগোর উপর সিগনেচার ফিক্স */
+        #user-sign-overlay { position: absolute; max-height: 50px; max-width: 120px; z-index: 2; transform: rotate(-5deg); display: none; }
+
+        .cert-title { text-align: center; font-size: 16px; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0; }
+        .main-text { line-height: 1.6; text-align: justify; font-size: 13px; min-height: 160px; word-wrap: break-word; }
+        .official-stamp { color: #3b4ca1; font-weight: bold; font-size: 14px; border: 2px solid #3b4ca1; padding: 2px 8px; display: inline-block; transform: rotate(-2deg); border-radius: 2px; }
+        .sig-hand { font-family: 'Mrs Saint Delafield', cursive; font-size: 45px; display: block; transform: rotate(-3deg); margin-bottom: -25px; color: #001233; }
+    </style>
+</head>
+<body>
+
+<div id="loader"><div>Processing...</div><small>Generating High Quality</small></div>
+
+<div id="login-screen">
+    <div class="login-box">
+        <img src="https://i.ibb.co.com/ynMZPSNg/dev-pic.jpg" style="width:60px; border-radius:50%; border:2px solid #2563eb; margin-bottom:10px;">
+        <h2 style="margin:0; font-size:18px;">TRICK A4IF Official Access</h2>
+        <p style="font-size:11px; color:#64748b; margin:5px 0 15px;">গোপন পাসওয়ার্ড দিয়ে ড্যাশবোর্ডে প্রবেশ করুন</p>
+        <input type="password" id="pass-key" class="pass-input" placeholder="পাসওয়ার্ড লিখুন...">
+        <button class="btn-login" onclick="checkPass()">ACCESS DASHBOARD</button>
+    </div>
+</div>
+
+<div id="splash-screen">
+    <img src="https://i.ibb.co.com/ynMZPSNg/dev-pic.jpg" class="splash-logo">
+    <div style="color:white; margin-top:15px; font-weight:bold; letter-spacing:1px;">TRICK A4IF CYBER COMMUNITY</div>
+</div>
+
+<div id="main-app">
+    <div class="dev-header">
+        <img src="https://i.ibb.co.com/ynMZPSNg/dev-pic.jpg" class="dev-img">
+        <div class="dev-info">
+            <h3>⚠️ TRICK A4IF (CYBER COMMUNITY)</h3>
+            <p>নিজ রিস্কে ব্যবহার করুন। এটি সামাজিক শর্তে গিফট করা হল।</p>
+        </div>
+        <div class="dev-wa">Support:<br>+8801576419581</div>
+    </div>
+
+    <div class="dashboard">
+        <div class="lang-switch full-row" style="display:flex; justify-content:center; gap:8px;">
+            <button class="btn-lang active" id="btn-en" onclick="setLang('en')" style="padding:5px 15px; border-radius:15px; cursor:pointer;">ENGLISH</button>
+            <button class="btn-lang" id="btn-bn" onclick="setLang('bn')" style="padding:5px 15px; border-radius:15px; cursor:pointer;">বাংলা</button>
+        </div>
+        
+        <div class="row-group">
+            <div class="input-box"><label>Serial No</label><input type="text" id="in-1" value="57265" oninput="sync()"></div>
+            <div class="input-box"><label>Trademark No</label><input type="text" id="in-2" value="193377" oninput="sync()"></div>
+        </div>
+        
+        <div class="row-group">
+            <div class="input-box"><label>Reg. Date</label><input type="date" onchange="syncDate(1, this.value)"></div>
+            <div class="input-box"><label>Seal Date</label><input type="date" onchange="syncDate(2, this.value)"></div>
+        </div>
+
+        <div class="input-box"><label>Company Name</label><input type="text" id="in-5" value="ASSURE DEVELOPMENT AND DESIGN LTD." oninput="sync()"></div>
+        <div class="input-box"><label>Body Description</label><textarea id="in-6" rows="3" oninput="sync()"></textarea></div>
+
+        <div class="row-group">
+            <div class="input-box"><label>Registrar Sign (Name)</label><input type="text" id="in-7" value="Obaidur" oninput="sync()"></div>
+            <div class="input-box"><label>Officer Full Name</label><input type="text" id="in-8" value="Md. Obaidur Rahman" oninput="sync()"></div>
+        </div>
+
+        <div class="row-group">
+            <div class="input-box"><label>1. Upload Brand Logo</label><input type="file" accept="image/*" onchange="loadImg(event, 'user-logo')"></div>
+            <div class="input-box"><label>2. Upload Handwritten Signature</label><input type="file" accept="image/*" onchange="loadImg(event, 'user-sign-overlay')"></div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn-exp" style="background:var(--success);" onclick="exportImg()">🖼 DOWNLOAD JPG</button>
+            <button class="btn-exp" style="background:var(--warn);" onclick="exportPDF()">📄 DOWNLOAD PDF</button>
+        </div>
+        <div class="full-row" style="text-align:center; margin-top:5px;"><small style="color:#94a3b8;">© 2026 TRICK A4IF | Powered by Arifull Islam (Rana)</small></div>
+    </div>
+
+    <div id="cert-wrap">
+        <div id="certificate">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px;">
+                <span id="txt-form">TMR-1 Form</span>
+                <span><span id="txt-serial">Serial No.</span> <span style="font-family:'Shadows Into Light'; font-size:18px; border-bottom:1px dotted #000;" id="out-1">57265</span></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; text-align: center; margin-top:15px;">
+                <img src="https://i.ibb.co.com/0H41Jfs/logo1.png" class="logo">
+                <div id="gov-text"></div>
+                <img src="https://i.ibb.co.com/M5JXGnTC/logo2.png" class="logo">
+            </div>
+            <div class="cert-title" id="out-title"></div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px; margin-bottom:12px;">
+                <span><span id="txt-tm">TM No.</span> <span id="out-2">193377</span></span>
+                <span><span id="txt-date">Date:</span> <span id="out-3">08/12/2015</span></span>
+            </div>
+            <div class="main-text">
+                <span id="txt-certify"></span>
+                <strong><i id="out-5">ASSURE DEVELOPMENT AND DESIGN LTD.</i></strong>, <span id="out-6"></span>
+            </div>
+            
+            <div style="height:120px; display:flex; justify-content:center; align-items:center; position:relative; margin:10px 0;">
+                <img id="user-logo" style="max-height:100px; max-width:200px; display:none;">
+                <img id="user-sign-overlay" src="" style="display:none;">
+            </div>
+            
+            <div style="margin-top:25px; font-size:12px;">
+                <span id="txt-sealed"></span> <span class="official-stamp" id="out-4">26 JUL 2020</span> <span id="txt-month"></span>
+            </div>
+            <div style="float:right; text-align:center; width:180px; margin-top:-10px;">
+                <span class="sig-hand" id="out-7">Obaidur</span>
+                <p style="font-size:11px;">__________________________<br><strong id="out-8">(Md. Obaidur Rahman)</strong><br><span id="txt-desig" style="font-size:9px;">Deputy Registrar</span></p>
+            </div>
+            <div style="clear:both; margin-top:55px; font-size:8px; border-top:1px solid #000; padding-top:8px; line-height:1.3;">
+                <span id="txt-legal"></span><br>
+                <div style="text-align:center; font-weight:bold; margin-top:4px;" id="txt-note"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Security: Password
+    function checkPass() {
+        const pass = document.getElementById('pass-key').value;
+        if(pass === ";&7৳893828**@") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('splash-screen').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('main-app').style.opacity = '1';
+                    applyScaling();
+                }, 50);
+                setLang('en');
+            }, 2000);
+        } else {
+            alert("Wrong Password!");
+        }
+    }
+
+    function applyScaling() {
+        const sw = window.innerWidth - 20;
+        if (sw < 550) {
+            const scale = sw / 550;
+            const cert = document.getElementById('certificate');
+            cert.style.transform = `scale(${scale})`;
+            document.getElementById('cert-wrap').style.height = `${770 * scale + 40}px`;
+        }
+    }
+
+    const translations = {
+        en: {
+            title: "Certificate of Registration of Trademark [Rule 30(1)]",
+            form: "TMR-1 Form", serial: "Serial No.", tm: "TM No.", date: "Date:",
+            certify: "Certified that the Trademark of which a representation is annexed hereto has been registered in the name of ",
+            sealed: "Sealed at my direction this", month: "day of ............ Month ............ ",
+            desig: "Deputy Registrar (Trademarks)", 
+            gov: `<h1 style="font-size:12px; margin:0;">Government of the People's Republic of Bangladesh</h1><h2 style="font-size:10px; margin:2px 0; font-weight:normal;">Department of Patents, Designs & Trade Marks</h2>`,
+            legal: "Registration is given for 7 years and may be renewed for 10 years.",
+            note: "This certificate is not for use in legal proceeding.",
+            body: "has been registered in the name of ASSURE DEVELOPMENT AND DESIGN LTD., Jabbar Tower, Dhaka, Bangladesh. in class 35 under No. 193377 as of the date 08/12/2015."
+        },
+        bn: {
+            title: "ট্রেডমার্ক নিবন্ধনের প্রশংসাপত্র [বিধি ৩০(১)]",
+            form: "টিএমআর-১ ফরম", serial: "ক্রমিক নং", tm: "ট্রেডমার্ক নং", date: "তারিখ:",
+            certify: "এতদ্বারা প্রত্যায়ন করা যাচ্ছে যে, ট্রেডমার্কটি নিম্নোক্ত নামে নিবন্ধিত হয়েছে: ",
+            sealed: "আমার নির্দেশে অদ্য", month: "তারিখ এবং ............ মাসে সিলমোহরকৃত।",
+            desig: "ডেপুটি রেজিস্ট্রার (ট্রেডমার্কস)",
+            gov: `<h1 style="font-size:14px; margin:0;">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</h1><h2 style="font-size:11px; margin:2px 0; font-weight:normal;">পেটেন্ট, ডিজাইন ও ট্রেডমার্কস অধিদপ্তর</h2>`,
+            legal: "নিবন্ধনটি উল্লিখিত তারিখ থেকে ৭ বছরের জন্য দেওয়া হলো।",
+            note: "এই সনদটি আইনি কার্যধারায় ব্যবহারযোগ্য নয়।",
+            body: "অ্যাসিয়র ডেভেলপমেন্ট অ্যান্ড ডিজাইন লিমিটেড, ঢাকা, বাংলাদেশ এর নামে নিবন্ধিত হয়েছে। শ্রেণী ৩৫ এর অধীনে নং ১৯৩৩৭৭ এবং তারিখ ০৮/১২/২০১৫ অনুযায়ী বিজ্ঞাপন ও ব্যবস্থাপনায়।"
+        }
+    };
+
+    function setLang(lang) {
+        document.getElementById('btn-en').classList.toggle('active', lang==='en');
+        document.getElementById('btn-bn').classList.toggle('active', lang==='bn');
+        const d = translations[lang];
+        document.getElementById('out-title').innerText = d.title;
+        document.getElementById('txt-form').innerText = d.form;
+        document.getElementById('txt-serial').innerText = d.serial;
+        document.getElementById('txt-tm').innerText = d.tm;
+        document.getElementById('txt-date').innerText = d.date;
+        document.getElementById('txt-certify').innerText = d.certify;
+        document.getElementById('txt-sealed').innerText = d.sealed;
+        document.getElementById('txt-month').innerText = d.month;
+        document.getElementById('txt-desig').innerText = d.desig;
+        document.getElementById('gov-text').innerHTML = d.gov;
+        document.getElementById('txt-legal').innerText = d.legal;
+        document.getElementById('txt-note').innerText = d.note;
+        document.getElementById('in-6').value = d.body;
+        sync();
+    }
+
+    function syncDate(type, val) {
+        if(!val) return;
+        const d = new Date(val);
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const formatted = type === 1 ? `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}` : `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+        document.getElementById(type === 1 ? 'out-3' : 'out-4').innerText = formatted;
+    }
+
+    function sync() {
+        document.getElementById('out-1').innerText = document.getElementById('in-1').value;
+        document.getElementById('out-2').innerText = document.getElementById('in-2').value;
+        document.getElementById('out-5').innerText = document.getElementById('in-5').value;
+        document.getElementById('out-6').innerText = document.getElementById('in-6').value;
+        document.getElementById('out-7').innerText = document.getElementById('in-7').value;
+        document.getElementById('out-8').innerText = "(" + document.getElementById('in-8').value + ")";
+    }
+
+    // স্মার্ট ইমেজ লোডার (লোগো এবং সিগনেচারের জন্য)
+    function loadImg(e, targetId) {
+        const reader = new FileReader();
+        reader.onload = () => { 
+            const img = document.getElementById(targetId);
+            img.src = reader.result; 
+            img.style.display = 'block'; 
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function exportImg() {
+        const cert = document.getElementById('certificate');
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+        const ot = cert.style.transform;
+        cert.style.transform = 'none';
+
+        html2canvas(cert, { scale: 3, useCORS: true }).then(canvas => {
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `Cert_${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            cert.style.transform = ot;
+            loader.style.display = 'none';
+        }).catch(() => { loader.style.display = 'none'; cert.style.transform = ot; });
+    }
+
+    async function exportPDF() {
+        const { jsPDF } = window.jspdf;
+        const cert = document.getElementById('certificate');
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+        const ot = cert.style.transform;
+        cert.style.transform = 'none';
+
+        const canvas = await html2canvas(cert, { scale: 3 });
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        pdf.save("Certificate.pdf");
+        cert.style.transform = ot;
+        loader.style.display = 'none';
+    }
+
+    window.onresize = applyScaling;
+</script>
+</body>
+</html>
